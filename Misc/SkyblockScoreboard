@@ -1,0 +1,116 @@
+# ########################################## #
+#                                            #
+#            Owned by BrassByte              #
+#           https://brassbyte.com            #
+#                                            #
+# ########################################## #
+
+options: # Do not change this!
+  author: "AstralSyntax"
+  version: "0.0.3"
+  dependencies: "SkBee, PlaceholderAPI"
+  prefix: "&7[&6sbsk&7]&f"
+  permissionMSG: "&cYou do not have permission to run that command!"
+
+variables:
+  {serverName} = "Server Name" # Default Server Name.
+  {serverWebsite} = "https://server-website.com" # Default Server Website.
+  {toggle} = "false" # Default state of Scoreboard Toggle
+
+on script load:
+# Check Version.
+  loop all players:
+    if loop-player has permission "sbsk.admin":
+      if text from "https://pastebin.com/1RU1Pya3" is not "{version}":
+        set {_newVer} to text from "https://pastebin.com/1RU1Pya3"
+        send "{prefix} &6You are using an outdated version of ScoreboardSkript!" to loop-player
+        send "{prefix} &6Your Verion: &c{version}" to loop-player
+        send "{prefix} &6Latest Version: &a{_newVer}" to loop-player
+        stop
+# Check files for PAPI Extensions / Double check for Vault plugin due to erroring on downloading Vault Extension without Vault.
+  if plugin "PlaceholderAPI" is enabled:
+    send "Checking PAPI Extensions." to console
+    if "plugins/vault.jar" exist:
+      if "plugins/PlaceholderAPI/expansions/Expansion-vault.jar" exist:
+        send "Vault Extension Detected!"
+      else:
+        send "Downloading Vault Extension..."
+        make console execute command "papi ecloud download Vault"
+    if "plugins/PlaceholderAPI/expansions/Expansion-luckperms.jar" exist:
+      send "LuckPerms Extension Detected"
+    else:
+      send "Downloading LuckPerms Extension..."
+      make console execute command "papi ecloud download LuckPerms"
+    if "plugins/PlaceholderAPI/expansions/Expansion-skript.jar" exist:
+      send "Skript Extension Detected"
+    else:
+      send "Downloading Skript Extension..."
+      make console execute command "papi ecloud download Skript"
+    if "plugins/PlaceholderAPI/expansions/Expansion-server.jar" exist:
+      send "Server Extension Detected!"
+    else:
+      send "Downloading Server Extension..."
+      make console execute command "papi ecloud download Server"
+    if "plugins/PlaceholderAPI/expansions/Expansion-statistic.jar" exist:
+      send "Statistics Extension Detected"
+    else:
+      send "Downloading Statistics Extension..."
+      make console execute command "papi ecloud download Statistic"
+    wait 5 seconds
+    make console execute command "papi reload"
+    send "downloaded PAPI Extensions!"
+  else:
+    send "%{prefix}% &6Warning: PAPI not detected! Scoreboard may not work!" to console
+
+on login:
+# load scoreboard.
+  updateScoreboard(player)
+
+# Update Scoreboard.
+every 20 ticks:
+  loop all players:
+    if scoreboard of loop-player is on:
+      updateScoreboard(loop-player)
+
+# Set Scoreboard Function.
+function updateScoreboard(p: player):
+  set title of {_p}'s scoreboard to "%{serverName}%"
+  set line 1 of {_p}'s scoreboard to "%%server_time_h:mm a%%"
+  set line 2 of {_p}'s scoreboard to "&f"
+  set line 3 of {_p}'s scoreboard to "%%luckperms_prefix%%"
+  set line 4 of {_p}'s scoreboard to "%%vault_eco_balance_formatted%%"
+  set line 5 of {_p}'s scoreboard to "%%statistic_player_kills%%"
+  set line 6 of {_p}'s scoreboard to "%%statistic_deaths%%"
+  set line 7 of {_p}'s scoreboard to "&f"
+  set line 8 of {_p}'s scoreboard to "%%serverWebsite%%"
+
+command /sbsk [<text>] [<text>] [<text>]:
+  permission: sbsk.admin
+  permission message: {permissionMSG}
+  trigger:
+    if arg-1 is "set":
+      if arg-2 is "serverName":
+        set {serverName} to arg-3
+        set title of player's scoreboard to {serverName}
+        updateScoreboard(player)
+        send "{prefix} You set the Scoreboard Server Name to %arg-3%" to player
+      if arg-2 is "serverWebsite":
+        set {serverWebsite} to arg-3
+        set line 8 of player's scoreboard to {serverWebsite}
+        updateScoreboard(player)
+        send "{prefix} You set the Scoreboard Server Website to %arg-3%" to player
+    if arg-1 is "toggle":
+      if {toggle::%player's uuid%} is false:
+        set {toggle::%player's uuid%} to true
+        toggle player's scoreboard to on
+        send "{prefix} Enabled the Scoreboard!"
+      else:
+        set {toggle::%player's uuid%} to false
+        toggle player's scoreboard to off
+        send "{prefix} Disabled Scoreboard!"
+
+on tab complete of "/sbsk":
+  set tab completions for position 1 to "set" and "toggle"
+  if tab arg-1 = "set":
+    set tab completions for position 2 to "serverName" and "serverWebsite"
+    set tab completions for position 3 to "<text>"
