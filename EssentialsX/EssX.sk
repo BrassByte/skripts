@@ -1,0 +1,215 @@
+# ########################################## #
+#                                            #
+#            Owned by BrassByte              #
+#           https://brassbyte.com            #
+#                                            #
+# ########################################## #
+
+# Permissions:
+# bbutil.admin - All commands
+# bbutil.rtp.set - Set rtp limits 
+# bbutil.rtp.cooldown - Bypass rtp cooldown
+# bbutil.spawn.set - Set server spawn point
+# bbutil.home.cooldown - Bypass home tp cooldown
+
+options: # Do not change this!
+  author: "AstralSyntax"
+  version: "0.0.0"
+  dependencies: "SkBee"
+  prefix: "&7[&6Brass Byte&7]&f"
+  permMSG: "{@prefix} &cYou do not have permission to run that command!"
+# RTP Options
+  rtpMax: "2500"
+  rtpMin: "-2500"
+# Misc Options
+  discordLink: "https://discord.gg/changeme"
+  storeLink: "https://store.changeme.com"
+
+# Misc
+command /bbu help:
+  descrition: Help with BrassByte Utilities
+  trigger:
+    if player has permission "bbutil.admin":
+      send "&6-- BrassByte Utilities --"
+      send "&6  https://brassbyte/com"
+      send "&6--------------------------"
+      send "&6/spawn - Telepoort to spawn"
+      send "&6/setspawn - Set the Server Spawn"
+      send "&6/home <name> - Teleport to a saved home."
+      send "&6/homes - List your saved homes."
+      send "&6/sethome <name> - Save your current location as a home."
+      send "&6/delhome <name> - Delete a saved home."
+      send "&6/warp <warp name> - Warp to a Server Warp."
+      send "&6/warps - List all Server Warps."
+      send "&6/setwarp <name> - Set a Server Warp."
+      send "&6/delwarp <name> - Delete a Server Warp."
+      send "&6/tpa <player name> - Request to teleport to a player."
+      send "&6/tpahere <player name> - Request a player to teleport to you."
+      send "&6/tpaall - Teleport all players to you."
+      send "&6/tpaaccept - Accept a teleport request."
+      send "&6/tpadeny - Deny a teleport request."
+      send "&6/rtp - Randomly teleport in the world."
+      send "&6/rtp set <-min> <+max> - Sets the minimum and maximum range for RTP. Use a -(negative) number for -min"
+    else:
+      send "&6-- BrassByte Utilities --"
+      send "&6  https://brassbyte/com"
+      send "&6--------------------------"
+      send "&6/spawn - Telepoort to spawn"
+      send "&6/home <name> - Teleport to a saved home."
+      send "&6/homes - List your saved homes."
+      send "&6/sethome <name> - Save your current location as a home."
+      send "&6/delhome <name> - Delete a saved home."
+      send "&6/warp <warp name> - Teleport to a Server Warp."
+      send "&6/warps - List all Server Warps."
+      send "&6/tpa <player name> - Request to teleport to a player."
+      send "&6/tpahere <player name> - Request a player to teleport to you."
+      send "&6/tpaaccept - Accept a teleport request."
+      send "&6/tpadeny - Deny a teleport request."
+      send "&6/rtp - Randomly teleport in the world."
+
+# Spawn
+command /spawn:
+  cooldown: 15 seconds
+  cooldown message: {@prefix} &cSlow down! You can use &a/spawn &cagain in {cooldown::%player's uuid%::spawn} seconds!
+  cooldown storage: {cooldown::%player's uuid%::spawn}
+  description: Teleport to the Server Spawn.
+  trigger:
+    if arg is not set:
+      if {spawn} is set:
+        teleport player to {spawn}
+        send "{@prefix} &aTeleported to spawn!"
+      else:
+        send "{@prefix} &cSpawn is not set!"
+    else if arg is "set"
+      if player has
+
+command /setspawn:
+  description: Set a Spawn Point for everyone on the Server.
+  trigger:
+    if player has permission "bbutil.spawn.set" or "bbutil.admin":
+      set {spawn} to location of player
+      send "{@prefix} &aServer Spawn has be set to {spawn}"
+    else:
+      send {@permMSG}
+
+# Homes
+command /home [<string>]:
+  cooldown: 15 seconds
+  cooldown message: {@prefix} &cYou can only teleport to your homes every 15 seconds!
+  cooldown bypass: bbutil.home.cooldown
+  cooldown storage: {coldown::%player's uuid%::home}
+  description: Teleport to your saved homes!
+  trigger:
+    if arg is set:
+      if {homes::%player's uuid%::%arg%} is set:
+        teleport player to {homes::%player's uuid%::%arg%}
+        send "{@prefix} &aTeleport to &6%arg%&a!"
+      else
+        send "{@prefix} &cThis home doesn't exist!"
+    else:
+      if {homes::%player's uuid%::home} is set:
+        teleport player to {homes::%player's uuid%::home}
+        send "{@prefix} &aTeleported to home."
+      else:
+        send "{@prefix} &cYou do not have a default home set"
+
+command /homes:
+  description: List your saved homes.
+  trigger:
+    if {homes::%player's uuid%::*} is set:
+      send "{@prefix} &6Your Homes:"
+      loop {homes::%player's uuid%::*}
+        send "&6%loop-index%" to player
+      send "&6Use &a/home <name> &6to teleport to a home!"
+    else:
+      send "{@prefix} &cYou have no homes set!"
+
+command /sethome [<string>]:
+  cooldown: 30 seconds
+  description: Save a location as a home.
+  trigger:
+    if arg is set: # Unfinished
+
+command /delhome [<string>]:
+  cooldown: 30 seconds
+  description: Delete a saved home.
+  trigger:
+    if arg is set:
+      if {homes::%player's uuid%::%arg%} is set:
+        delete {homes::%player's uuid%::%arg%}
+        send "{@prefix} &aHome &c%arg% &adeleted!"
+      else:
+        send "{@prefix} &cThis gome doesn't exist!"
+    else:
+      send "{@perfix} &6Which home would you like to delete?"
+      loop {homes::%player's uuid%::*}
+        send "&6%loop-index%"
+      send "&6Use &a/delhome <name> &6 to delete a home."
+
+# Warps
+command /warp [<string>]:
+  description: Teleport to a Server Warp.
+  trigger:
+    if arg is set:
+      if {warps::%arg%} is set:
+        teleport player to {warps::%arg%}
+        send "{@prefix} &aTeleported to warp - &6%arg%"
+      else:
+        send "{@prefix} &cWarp &6%arg% &cdoes not exist!"
+    else if arg is not set:
+      send "{@prefix} &cYou must include a warp name!"
+
+command /warps:
+  description: List the servers warps.
+  trigger:
+    loop {warps::*}
+      send "&6%loop-index%"
+    send "&6Use &a/warp <name> &6to teleport to a warp!"
+
+command /setwarp [<string>]:
+
+command /delwarp [<string>]:
+
+
+# TPA
+/tpa
+/tpahere
+/tpaall
+/tpaaccept
+/tpadeny
+
+# RTP
+command /rtp [<text>] [<string>] [<string>]:
+  cooldown: 15 seconds
+  cooldown message: {@prefix} &cYou can only teleport to a random location every 15 seconds.
+  cooldown bypass: bbutil.rtp.cooldown
+  cooldown storage: {cooldown::%player's uuid%::rtp}
+  description: Randomly teleport around the world.
+  trigger:
+    if arg-1 is not set:
+      set {_x} to round(random number between {rtpMin} and {rtpMax})
+      set {_z} to round(random number between {rtpMin} and {rtpMax})
+      set {_block} to block at location at ({_x}, 0, {_z}) in world event-world
+      loop all blocks above {_block}:
+        if loop-block is air:
+          if block below loop-block is not water:
+            if block below loop-block is not air:
+              if block above loop-block is air:
+                teleport player to loop-block
+                send "{@prefix} &aTeleported to a random location" to player
+    if arg-1 is "set":
+      if player has permission "bbutil.admin" or "bbutil.rtp.set":
+        set {rtpMin} to arg-2
+        set {rtpMax} to arg-3
+        send "{@prefix} You set the max RTP to %arg-2%x%arg-3%"
+      else:
+        send {@permMSG}\
+
+# Payments and Balance
+
+# gamemode
+# Misc / Extras
+# Repair
+# Heal
+# Discord
+# Store
