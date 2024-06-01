@@ -1,0 +1,28 @@
+## #############################################
+##                                            ##
+##           Owned by BrassByte               ##
+##          https://brassbyte.com             ##
+##                                            ##
+##               Version - 0                  ##
+## #############################################
+config:
+  sleepPercentage: 33
+
+on load:
+	set {sleepcount} to 0
+  
+On Bed Enter:
+  broadcast "%player% is trying to skip the night!"
+  set {sleeping::%player%} to player
+  if size of {sleeping:*} is {sleepPercentage} percent of online players
+    set time to 07:00
+	  broadcast "Saving worlds."
+    save all worlds
+  else if
+    set {needToSleep} to {sleeping:*} - {{sleepPercentage} / online players}
+    broadcast "Need {needToSleep} players to rest!"
+  else
+    stop
+
+On Bed Leave:
+	remove player from {sleepeing::*}
