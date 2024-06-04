@@ -24,7 +24,7 @@ on bed enter:
         save all worlds
     else:
         set {needToSleep} to (size of {sleeping::*} - ({sleepPercentage} / {_onlineplayers} * 100))
-        broadcast "Need {needToSleep} players to rest!"
+        broadcast "Need %needToSleep% players to rest!"
 
 on bed leave:
     remove player from {sleeping::*}
