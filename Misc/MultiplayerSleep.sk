@@ -1,30 +1,31 @@
-###############################################
+################################################
 ##                                            ##
 ##           Owned by BrassByte               ##
 ##          https://brassbyte.com             ##
 ##                                            ##
 ##               Version - 0                  ##
-###############################################
+################################################
 
 options:
-    sleepingPercentage: 33
+    multiplayerSleep-enabled: true
+    multiplayerSleep-sleepPercentage: 33
 
 on load:
-    set {sleepCount} to 0
-    clear {sleeping::*}
+    clear {multiplayerSleep::sleeping::*}
 
 on bed enter:
-    broadcast "%player% is trying to skip the night!"
-    add player to {sleeping::*}
-    set {_onlineplayers} to number of all players
-    if size of {sleeping::*} >= ({sleepingPercentage} / {_onlineplayers} * 100):
-        wait 1.5 seconds
-        set time to 7:00
-        broadcast "Saving worlds."
-        save all worlds
-    else:
-        set {needToSleep} to (size of {sleeping::*} - ({sleepPercentage} / {_onlineplayers} * 100))
-        broadcast "Need %needToSleep% players to rest!"
+    if {@multiplayerSleep-enabled} is true:
+        set {_sleepingPercentage} to {@multiplayerSleep-sleepPercentage}
+        broadcast "%player% is trying to skip the night!"
+        add player to {multiplayerSleep::sleeping::*}
+        set {_onlineplayers} to number of all players
+        if ((size of {multiplayerSleep::sleeping::*}) / {_onlineplayers} * 100) is greater than or equal to ({_sleepingPercentage}):
+            set time to 7:00
+            broadcast "Saving worlds."
+            save all worlds
+        else:
+            set {_needToSleep} to (size of {multiplayerSleep::sleeping::*} - ({sleepPercentage} / {_onlineplayers} * 100)) - 1
+            broadcast "Need %{_needToSleep}% players to rest!"
 
 on bed leave:
-    remove player from {sleeping::*}
+    remove player from {multiplayerSleep::sleeping::*}
